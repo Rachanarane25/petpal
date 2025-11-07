@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Adoptions</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🐕 My Adopted Pets 🐾</h1>
+
+  <div>
+    <label for="username">Enter your name:</label>
+    <input type="text" id="username" placeholder="Your name">
+    <button onclick="loadAdoptions()">View My Adoptions</button>
+  </div>
+
+  <div id="adoptionsContainer" class="pets-grid"></div>
+
+  <script>
+    async function loadAdoptions() {
+      const name = document.getElementById('username').value.trim();
+      if (!name) {
+        alert("Please enter your name!");
+        return;
+      }
+
+      const res = await fetch(`http://127.0.0.1:5000/adoptions?user_name=${name}`);
+      const data = await res.json();
+      const container = document.getElementById('adoptionsContainer');
+      container.innerHTML = "";
+
+      if (data.length === 0) {
+        container.innerHTML = "<p>No adoptions found yet 😿</p>";
+        return;
+      }
+
+      data.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'pet-card';
+        div.innerHTML = `
+          <h3>${a.pet_name}</h3>
+          <p>Type: ${a.type}</p>
+          <p>Age: ${a.age}</p>
+          <p>${a.description}</p>
+          <p><strong>Adopted by:</strong> ${a.user_name}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
