@@ -1,25 +1,28 @@
-// Fetch pets from Flask backend
 document.addEventListener("DOMContentLoaded", () => {
-  const petList = document.getElementById("pet-list");
+  const petCardsContainer = document.getElementById("pets-container");
 
   fetch("http://127.0.0.1:5000/pets")
     .then(response => response.json())
-    .then(data => {
-      data.forEach(pet => {
+    .then(pets => {
+      petCardsContainer.innerHTML = "";
+      pets.forEach(pet => {
         const card = document.createElement("div");
-        card.classList.add("pet-card");
+        card.className = "pet-card";
+
         card.innerHTML = `
-          <img src="https://placekitten.com/250/180" alt="${pet.name}">
+          <img src="http://127.0.0.1:5000${pet.image}" alt="${pet.name}">
           <h3>${pet.name}</h3>
-          <p>Type: ${pet.type}</p>
-          <p>Age: ${pet.age} years</p>
-          <p>Location: ${pet.location}</p>
+          <p><b>Type:</b> ${pet.type}</p>
+          <p><b>Age:</b> ${pet.age}</p>
+          <p>${pet.description}</p>
+          <button class="adopt-btn" onclick="adoptPet(${pet.id})">Adopt</button>
         `;
-        petList.appendChild(card);
+
+        petCardsContainer.appendChild(card);
       });
     })
     .catch(err => {
-      petList.innerHTML = `<p style="color:red;">Failed to load pets 😢</p>`;
       console.error(err);
+      petCardsContainer.innerHTML = "<p>Failed to load pets 😢</p>";
     });
 });

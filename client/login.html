@@ -1,92 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PetPal Login</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetPal 🐾 | Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #ff9a8b, #ff6f61, #ffd6a5);
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
     }
 
-    .login-box {
-      background: white;
-      padding: 30px 40px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    .container {
+      display: flex;
+      width: 850px;
+      height: 550px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 25px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      animation: fadeIn 1s ease;
+    }
+
+    /* Left side full image section */
+    .left {
+  width: 50%;
+  background: url('http://127.0.0.1:5000/static/images/bruno.webp') center/cover no-repeat;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+    .overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 30px;
+    }
+
+    /* QUOTE BOX */
+    .quote-box {
+      color: #fff;
       text-align: center;
-      width: 300px;
+      font-size: 1.3rem;
+      line-height: 1.7;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+      animation: fadeUp 2s ease;
+      max-width: 85%;
     }
 
-    .login-box h2 {
-      color: #333;
-      margin-bottom: 20px;
+    .quote-box h2 {
+      font-weight: 600;
+      font-style: italic;
+      margin-bottom: 15px;
+      animation: glowText 4s ease-in-out infinite alternate;
     }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      outline: none;
+    .quote-box .tagline {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #ffdf91;
+      text-shadow: 0 0 8px rgba(255, 223, 145, 0.6);
+      letter-spacing: 1px;
     }
 
-    button {
-      width: 100%;
-      background-color: #ff7f50;
+    @keyframes glowText {
+      0% { text-shadow: 0 0 10px #fff5cc, 0 0 20px #ffc26f; }
+      100% { text-shadow: 0 0 25px #fff5cc, 0 0 50px #ffb347; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Right side login box */
+    .right {
+      width: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: 0.3s;
+      padding: 40px;
     }
 
-    button:hover {
-      background-color: #ff5722;
+    .logo {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: white;
+      padding: 8px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
     }
 
     p {
-      color: red;
-      font-size: 14px;
+      color: #fffbe7;
+      margin-bottom: 25px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    input {
+      width: 80%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 25px;
+      outline: none;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      box-shadow: 0 0 10px #ffdf91;
+    }
+
+    .password-wrapper {
+      position: relative;
+      width: 80%;
+    }
+
+    .toggle-pass {
+      position: absolute;
+      right: 20px;
+      top: 12px;
+      cursor: pointer;
+      color: #555;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    button {
+      background: linear-gradient(45deg, #ff6f61, #ffb347);
+      color: white;
+      font-weight: 600;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+      transition: transform 0.2s ease, box-shadow 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+    }
+
+    .social-login {
+      margin-top: 20px;
+    }
+
+    .social-login button {
+      background: white;
+      color: #333;
+      font-weight: 600;
+      margin: 5px;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .social-login button:hover {
+      background: #f8f8f8;
+      transform: scale(1.03);
+    }
+
+    .social-login img {
+      width: 18px;
+      height: 18px;
+    }
+
+    .create-account {
+      margin-top: 15px;
+    }
+
+    .create-account a {
+      color: #ffe7c7;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .create-account a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: #333;
+      color: white;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.4s ease;
+      z-index: 9999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h2>Welcome to PetPal 🐾</h2>
-    <input type="text" id="username" placeholder="Enter username" />
-    <input type="password" id="password" placeholder="Enter password" />
-    <button onclick="login()">Login</button>
-    <p id="error"></p>
+  <div class="container">
+    <div class="left">
+      <div class="overlay">
+        <div class="quote-box">
+          <h2>“Saving one animal won’t change the world,<br>
+          but it will change the world for that one animal.”</h2>
+          <p class="tagline">— Adopt. Love. Repeat. 🐾</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="right">
+      <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" class="logo" alt="PetPal Logo">
+      <h1>Welcome Back!</h1>
+      <p>Login to your PetPal account and start your adoption journey 🐶💖</p>
+
+      <input type="text" id="username" placeholder="Enter your username">
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Enter your password">
+        <span class="toggle-pass" onclick="togglePassword()">👁</span>
+      </div>
+
+      <button onclick="login()">Login</button>
+
+      <div class="social-login">
+        <p style="margin-top:15px;color:#fffbe7;">Or continue with</p>
+        <button><img src="https://cdn-icons-png.flaticon.com/512/300/300221.png"> Google</button>
+        <button><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png"> Facebook</button>
+      </div>
+
+      <div class="create-account">
+        <p>New here? <a href="#">Create an Account</a></p>
+      </div>
+    </div>
   </div>
 
-  <script>
-    function login() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const error = document.getElementById('error');
+  <div id="toast" class="toast"></div>
 
-      if (username === "" || password === "") {
-        error.textContent = "Please fill in all fields.";
+  <script>
+    const toast = document.getElementById("toast");
+
+    function showToast(message) {
+      toast.innerText = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    function togglePassword() {
+      const pass = document.getElementById("password");
+      pass.type = pass.type === "password" ? "text" : "password";
+    }
+
+    function login() {
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value.trim();
+
+      if (!user || !pass) {
+        showToast("Please fill in both fields!");
         return;
       }
 
-      // Simple check (no backend yet)
-      if (username === "admin" && password === "petpal123") {
-        localStorage.setItem("user", username);
-        window.location.href = "./pets.html"; // redirect to pet listing
-      } else {
-        error.textContent = "Invalid username or password!";
-      }
+      localStorage.setItem("petpal_user", user);
+      showToast(`Welcome, ${user}! Redirecting...`);
+      setTimeout(() => {
+        window.location.href = "pets.html";
+      }, 1500);
     }
   </script>
 </body>

@@ -1,19 +1,20 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+from flask import Flask, jsonify, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 import os
 
-app = Flask(__name__)
+# ------------------- APP SETUP -------------------
+# app will serve files from server/static at /static/...
+app = Flask(__name__, static_folder="static", static_url_path="/static")
 CORS(app)
 
 # ------------------- DATABASE SETUP -------------------
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'pets.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
 
-# ------------------- DATABASE MODELS -------------------
+# ------------------- MODELS -------------------
 class Pet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
@@ -21,6 +22,7 @@ class Pet(db.Model):
     age = db.Column(db.Integer)
     description = db.Column(db.String(200))
     adopted = db.Column(db.Boolean, default=False)
+    image = db.Column(db.String(200))
 
 class Adoption(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -29,71 +31,78 @@ class Adoption(db.Model):
     pet_name = db.Column(db.String(50))
 
 # ------------------- ROUTES -------------------
+@app.route('/static/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory(os.path.join(app.static_folder, 'images'), filename)
+
 @app.route('/pets', methods=['GET'])
 def get_pets():
-    """Get all pets that are not yet adopted."""
     pets = Pet.query.filter_by(adopted=False).all()
     pet_list = [
-        {"id": p.id, "name": p.name, "type": p.type, "age": p.age, "description": p.description}
+        {"id": p.id, "name": p.name, "type": p.type, "age": p.age, "description": p.description, "image": p.image}
         for p in pets
     ]
     return jsonify(pet_list)
 
 @app.route('/adopt', methods=['POST'])
 def adopt_pet():
-    """Adopt a pet and record it in the database."""
     data = request.get_json()
+    user = data.get("user") or data.get("user_name")  # tolerate different keys
     pet_id = data.get("pet_id")
-    user_name = data.get("user_name")
+
+    if not user:
+        return jsonify({"error": "Please login first"}), 401
 
     pet = Pet.query.get(pet_id)
     if not pet or pet.adopted:
         return jsonify({"error": "Pet not found or already adopted"}), 404
 
-    # Mark as adopted
     pet.adopted = True
-    adoption = Adoption(user_name=user_name, pet_id=pet.id, pet_name=pet.name)
-
+    adoption = Adoption(user_name=user, pet_id=pet.id, pet_name=pet.name)
     db.session.add(adoption)
     db.session.commit()
+    return jsonify({"message": f"{user} successfully adopted {pet.name}!"})
 
-    return jsonify({"message": f"{user_name} successfully adopted {pet.name}!"})
-
-@app.route('/adoptions', methods=['GET'])
-def get_user_adoptions():
-    """Get all adoptions made by a specific user."""
-    user_name = request.args.get('user_name')
-    if not user_name:
-        return jsonify({"error": "Missing user name"}), 400
-
-    adoptions = Adoption.query.filter_by(user_name=user_name).all()
-    results = []
-    for a in adoptions:
-        pet = Pet.query.get(a.pet_id)
-        results.append({
-            "user_name": a.user_name,
-            "pet_name": a.pet_name,
-            "type": pet.type if pet else "Unknown",
-            "age": pet.age if pet else "-",
-            "description": pet.description if pet else "-"
-        })
-    return jsonify(results)
-
-# ------------------- INITIAL DATA -------------------
 @app.route('/init', methods=['GET'])
-def init_data():
-    """Initialize the database with sample pets."""
-    db.create_all()
-    if not Pet.query.first():
-        pets = [
-            Pet(name="Buddy", type="Dog", age=3, description="Friendly golden retriever"),
-            Pet(name="Milo", type="Cat", age=2, description="Playful tabby cat"),
-            Pet(name="Coco", type="Parrot", age=1, description="Loves to talk and sing")
-        ]
-        db.session.add_all(pets)
-        db.session.commit()
-    return jsonify({"message": "Database initialized with sample pets!"})
+def init_route():
+    # optional manual init endpoint
+    with app.app_context():
+        _reset_pets()
+    return jsonify({"message": "Database initialized (manual /init)"})
 
-# ------------------- MAIN -------------------
+
+# ------------------- INTERNAL RESET FUNCTION -------------------
+def _reset_pets():
+    """
+    Must be called inside an application context (app.app_context()).
+    Resets (deletes) existing pets and re-adds the 7 sample pets.
+    """
+    db.create_all()
+    # delete all records
+    Adoption.query.delete()
+    Pet.query.delete()
+    db.session.commit()
+
+    pets = [
+        Pet(name="Bruno", type="Dog", age=3, description="Friendly and loyal", image="/static/images/bruno.webp"),
+        Pet(name="Chintu", type="Cat", age=2, description="Playful and curious", image="/static/images/chintu.webp"),
+        Pet(name="Coco", type="Parrot", age=1, description="Talkative and cheerful", image="/static/images/coco.webp"),
+        Pet(name="Rocky", type="Rabbit", age=1, description="Soft and gentle, loves carrots", image="/static/images/rocky.webp"),
+        Pet(name="Tommy", type="Dog", age=4, description="Energetic and loves running", image="/static/images/tommy.webp"),
+        Pet(name="Milo", type="Cat", age=3, description="Curious and independent", image="/static/images/milo.webp"),
+        Pet(name="Soni", type="Rabbit", age=2, description="Soft and friendly", image="/static/images/soni.webp")
+    ]
+
+    db.session.add_all(pets)
+    db.session.commit()
+    print("✅ Database reset: 7 sample pets created.")
+
+
+# ------------------- STARTUP -------------------
 if __name__ == '__main__':
+    # Ensure we run reset inside application context (prevents the RuntimeError you saw)
+    with app.app_context():
+        _reset_pets()
+    # Start server
+    print("Starting Flask server on http://127.0.0.1:5000")
     app.run(debug=True)
