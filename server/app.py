@@ -7,7 +7,7 @@ import os
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 
 # ✅ Allow your GitHub Pages site to access this backend
-CORS(app, resources={r"/*": {"origins": ["https://rachanarane25.github.io"]}})
+CORS(app, resources={r"/*": {"origins": ["https://Rachanarane25.github.io"]}})
 
 # ------------------- DATABASE SETUP -------------------
 basedir = os.path.abspath(os.path.dirname(__file__))
