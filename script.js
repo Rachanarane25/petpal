@@ -2,28 +2,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const petCardsContainer = document.getElementById("pets-container");
   const backendURL = "https://petpal-backend-nza1.onrender.com";
 
-  // Fetch pets from your deployed Flask backend
+  petCardsContainer.innerHTML = "Loading pets...";
   fetch(`${backendURL}/pets`)
-    .then(response => {
-      if (!response.ok) throw new Error("Failed to fetch pets");
-      return response.json();
+    .then(res => {
+      if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+      return res.json();
     })
     .then(pets => {
       petCardsContainer.innerHTML = "";
-
       pets.forEach(pet => {
         const card = document.createElement("div");
         card.className = "pet-card";
-
         card.innerHTML = `
           <img src="${backendURL}${pet.image}" alt="${pet.name}">
           <h3>${pet.name}</h3>
-          <p><b>Type:</b> ${pet.type}</p>
-          <p><b>Age:</b> ${pet.age}</p>
-          <p>${pet.description}</p>
-          <button class="adopt-btn" onclick="adoptPet(${pet.id})">Adopt</button>
         `;
-
+        // show details on click
+        card.addEventListener("click", () => {
+          const details = card.querySelectorAll('.details');
+          if (details.length === 0) {
+            const html = `
+              <p class="details"><b>Type:</b> ${pet.type}</p>
+              <p class="details"><b>Age:</b> ${pet.age}</p>
+              <p class="details">${pet.description}</p>
+              <button class="adopt-btn details" onclick="adoptPet(${pet.id}); event.stopPropagation();">Adopt</button>
+            `;
+            card.insertAdjacentHTML('beforeend', html);
+          } else {
+            details.forEach(d => d.remove());
+          }
+        });
         petCardsContainer.appendChild(card);
       });
     })
@@ -35,25 +43,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function adoptPet(petId) {
   const user = localStorage.getItem("petpal_user");
-
-  if (!user) {
-    // Redirect to login if user not logged in
-    window.location.href = "login.html";
-    return;
-  }
+  if (!user) return window.location.href = "login.html";
 
   const backendURL = "https://petpal-backend-nza1.onrender.com";
-
   fetch(`${backendURL}/adopt`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pet_id: petId, user_name: user })
   })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.message);
-      // Refresh pet list after adoption
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) alert(data.error);
+    else {
+      // prompt success and refresh list
+      alert(data.message || "Adopted!");
       window.location.reload();
-    })
-    .catch(err => console.error("Error:", err));
+    }
+  })
+  .catch(e => console.error(e));
 }
