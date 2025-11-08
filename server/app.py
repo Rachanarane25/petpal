@@ -6,7 +6,7 @@ import os
 # ------------------- APP SETUP -------------------
 # app will serve files from server/static at /static/...
 app = Flask(__name__, static_folder="static", static_url_path="/static")
-CORS(app)
+CORS(app, resources={r"/*": {"origins": ["https://rachanarane25.github.io", "http://localhost:5500"]}})
 
 # ------------------- DATABASE SETUP -------------------
 basedir = os.path.abspath(os.path.dirname(__file__))
