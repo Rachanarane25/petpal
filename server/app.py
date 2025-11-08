@@ -3,20 +3,16 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
 
+# Flask app; static folder is inside server/static
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 
-# Allow requests from your GitHub Pages + localhost (for testing)
-CORS(app, resources={r"/*": {"origins": [
-    "https://rachanarane25.github.io",
-    "https://rachanarane25.github.io/petpal",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "*"
-]}})
+# TEMP: allow all origins so GitHub Pages can fetch. When working, restrict this.
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'pets.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
 class Pet(db.Model):
@@ -52,9 +48,9 @@ def get_pets():
 
 @app.route('/adopt', methods=['POST'])
 def adopt_pet():
-    data = request.get_json()
-    user_name = data.get("user_name") or data.get("user")
+    data = request.get_json() or {}
     pet_id = data.get("pet_id")
+    user_name = data.get("user_name")
     if not user_name:
         return jsonify({"error": "Please login first"}), 401
     pet = Pet.query.get(pet_id)
@@ -73,23 +69,24 @@ def init_route():
 
 def _reset_pets():
     db.create_all()
+    # remove existing rows
     Adoption.query.delete()
     Pet.query.delete()
     db.session.commit()
     pets = [
-        Pet(name="Bruno", type="Dog", age=3, description="Friendly dog", image="/static/images/bruno.webp"),
-        Pet(name="Chintu", type="Cat", age=2, description="Playful cat", image="/static/images/chintu.webp"),
-        Pet(name="Coco", type="Parrot", age=1, description="Loves to talk and sing", image="/static/images/coco.webp"),
+        Pet(name="Bruno", type="Dog", age=3, description="Friendly and loyal", image="/static/images/bruno.webp"),
+        Pet(name="Chintu", type="Cat", age=2, description="Playful and curious", image="/static/images/chintu.webp"),
+        Pet(name="Coco", type="Parrot", age=1, description="Talkative and cheerful", image="/static/images/coco.webp"),
         Pet(name="Rocky", type="Rabbit", age=1, description="Soft and gentle, loves carrots", image="/static/images/rocky.webp"),
-        Pet(name="Tommy", type="Dog", age=4, description="Energetic and loves to play fetch", image="/static/images/tommy.webp"),
-        Pet(name="Milo", type="Cat", age=3, description="Independent and curious", image="/static/images/milo.webp"),
-        Pet(name="Soni", type="Rabbit", age=2, description="Colorful and chatty", image="/static/images/soni.webp")
+        Pet(name="Tommy", type="Dog", age=4, description="Energetic and loves running", image="/static/images/tommy.webp"),
+        Pet(name="Milo", type="Cat", age=3, description="Curious and independent", image="/static/images/milo.webp"),
+        Pet(name="Soni", type="Rabbit", age=2, description="Soft and friendly", image="/static/images/soni.webp")
     ]
     db.session.add_all(pets)
     db.session.commit()
-    print("✅ Database reset with sample pets")
 
 if __name__ == '__main__':
+    # initialize DB when running locally
     with app.app_context():
         _reset_pets()
     app.run(debug=True)
