@@ -87,7 +87,7 @@
       background-color: #ff6347;
     }
 
-    /* Toast (login prompt) */
+    /* Toast Notification */
     .toast {
       position: fixed;
       bottom: 25px;
@@ -118,6 +118,9 @@
     const container = document.getElementById("pets-container");
     const toast = document.getElementById("toast");
 
+    // ✅ your deployed backend on Render
+    const backendURL = "https://petpal-backend-nza1.onrender.com";
+
     function showToast(message) {
       toast.innerText = message;
       toast.classList.add("show");
@@ -126,7 +129,8 @@
 
     async function loadPets() {
       try {
-        const res = await fetch("http://127.0.0.1:5000/pets");
+        const res = await fetch(`${backendURL}/pets`);
+        if (!res.ok) throw new Error(`Backend returned ${res.status}`);
         const pets = await res.json();
         container.innerHTML = "";
 
@@ -135,7 +139,7 @@
           card.className = "pet-card";
 
           card.innerHTML = `
-            <img src="http://127.0.0.1:5000${pet.image}" alt="${pet.name}">
+            <img src="${backendURL}${pet.image}" alt="${pet.name}">
             <div class="pet-name">${pet.name}</div>
             <div class="pet-details">
               <p><b>Type:</b> ${pet.type}</p>
@@ -145,7 +149,7 @@
             </div>
           `;
 
-          // Toggle details on image/name click
+          // Toggle details when clicking on image or name
           card.addEventListener("click", (e) => {
             if (!e.target.classList.contains("adopt-btn")) {
               const details = card.querySelector(".pet-details");
@@ -153,7 +157,7 @@
             }
           });
 
-          // Adopt button click
+          // Handle Adopt button click
           card.querySelector(".adopt-btn").addEventListener("click", async (e) => {
             e.stopPropagation();
             const user = localStorage.getItem("petpal_user");
@@ -165,7 +169,7 @@
               return;
             }
 
-            const res = await fetch("http://127.0.0.1:5000/adopt", {
+            const res = await fetch(`${backendURL}/adopt`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ user_name: user, pet_id: petId })
@@ -173,7 +177,7 @@
 
             const data = await res.json();
             showToast(data.message || "Adoption failed!");
-            loadPets(); // refresh the list to remove adopted pet
+            loadPets(); // Refresh to remove adopted pet
           });
 
           container.appendChild(card);
@@ -181,7 +185,7 @@
 
       } catch (err) {
         container.innerHTML = "⚠️ Failed to load pets.";
-        console.error(err);
+        console.error("Error fetching pets:", err);
       }
     }
 
