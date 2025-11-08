@@ -3,11 +3,10 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
 
-# Flask app; static folder is inside server/static
-app = Flask(__name__, static_folder="static", static_url_path="/static")
+from flask_cors import CORS
 
-# TEMP: allow all origins so GitHub Pages can fetch. When working, restrict this.
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": ["https://rachanarane25.github.io"]}})
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'pets.db')
