@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const petCardsContainer = document.getElementById("pets-container");
 
-  fetch("http://127.0.0.1:5000/pets")
+fetch("https://petpal-backend-nza1.onrender.com/pets")
     .then(response => response.json())
     .then(pets => {
       petCardsContainer.innerHTML = "";
