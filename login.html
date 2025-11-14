@@ -3,282 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PetPal 🐾 | Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <title>Login | PetVerse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="./supabase-client.js"></script>
+
+<script src="./auth.js" defer></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #ff9a8b, #ff6f61, #ffd6a5);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-    }
-
-    .container {
-      display: flex;
-      width: 850px;
-      height: 550px;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      border-radius: 25px;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
-      overflow: hidden;
-      animation: fadeIn 1s ease;
-    }
-
-    /* Left side full image section */
-    .left {
-  width: 50%;
-  background: url('http://127.0.0.1:5000/static/images/bruno.webp') center/cover no-repeat;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-
-    .overlay {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.55);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding: 30px;
-    }
-
-    /* QUOTE BOX */
-    .quote-box {
-      color: #fff;
-      text-align: center;
-      font-size: 1.3rem;
-      line-height: 1.7;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
-      animation: fadeUp 2s ease;
-      max-width: 85%;
-    }
-
-    .quote-box h2 {
-      font-weight: 600;
-      font-style: italic;
-      margin-bottom: 15px;
-      animation: glowText 4s ease-in-out infinite alternate;
-    }
-
-    .quote-box .tagline {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: #ffdf91;
-      text-shadow: 0 0 8px rgba(255, 223, 145, 0.6);
-      letter-spacing: 1px;
-    }
-
-    @keyframes glowText {
-      0% { text-shadow: 0 0 10px #fff5cc, 0 0 20px #ffc26f; }
-      100% { text-shadow: 0 0 25px #fff5cc, 0 0 50px #ffb347; }
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Right side login box */
-    .right {
-      width: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      padding: 40px;
-    }
-
-    .logo {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: white;
-      padding: 8px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-      margin-bottom: 15px;
-    }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    p {
-      color: #fffbe7;
-      margin-bottom: 25px;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
-    input {
-      width: 80%;
-      padding: 12px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 25px;
-      outline: none;
-      font-size: 1rem;
-      transition: all 0.3s;
-    }
-
-    input:focus {
-      box-shadow: 0 0 10px #ffdf91;
-    }
-
-    .password-wrapper {
-      position: relative;
-      width: 80%;
-    }
-
-    .toggle-pass {
-      position: absolute;
-      right: 20px;
-      top: 12px;
-      cursor: pointer;
-      color: #555;
-      font-size: 0.9rem;
-      user-select: none;
-    }
-
-    button {
-      background: linear-gradient(45deg, #ff6f61, #ffb347);
-      color: white;
-      font-weight: 600;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 1rem;
-      margin-top: 10px;
-      transition: transform 0.2s ease, box-shadow 0.3s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
-    }
-
-    .social-login {
-      margin-top: 20px;
-    }
-
-    .social-login button {
-      background: white;
-      color: #333;
-      font-weight: 600;
-      margin: 5px;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.3s ease;
-    }
-
-    .social-login button:hover {
-      background: #f8f8f8;
-      transform: scale(1.03);
-    }
-
-    .social-login img {
-      width: 18px;
-      height: 18px;
-    }
-
-    .create-account {
-      margin-top: 15px;
-    }
-
-    .create-account a {
-      color: #ffe7c7;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .create-account a:hover {
-      color: #fff;
-      text-decoration: underline;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      background: #333;
-      color: white;
-      padding: 14px 22px;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: all 0.4s ease;
-      z-index: 9999;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    /* All your existing styles... */
+    .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-light), var(--primary)); padding: 2rem; }
+    .login-box { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; max-width: 900px; width: 100%; overflow: hidden; }
+    .login-left { flex: 1; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: var(--white); padding: 3rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
+    .login-left::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('/static/images/bruno.webp') center/cover; opacity: 0.1; }
+    .login-left-content { position: relative; z-index: 2; }
+    .login-left h2 { font-size: 1.8rem; margin-bottom: 1rem; font-weight: 600; }
+    .login-left p { opacity: 0.9; line-height: 1.6; }
+    .login-right { flex: 1; padding: 3rem; display: flex; flex-direction: column; justify-content: center; }
+    .login-logo { width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--white); font-size: 2rem; }
+    .login-right h1 { text-align: center; color: var(--primary); margin-bottom: 0.5rem; font-size: 2rem; }
+    .login-subtitle { text-align: center; color: var(--text-light); margin-bottom: 2rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text); font-weight: 500; }
+    .form-input { width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--primary-light); border-radius: var(--radius); font-size: 1rem; transition: all 0.3s ease; background: var(--background); }
+    .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 95, 191, 0.1); }
+    .password-wrapper { position: relative; }
+    .toggle-password { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-light); padding: 0.5rem; }
+    .login-btn { width: 100%; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: var(--white); border: none; padding: 1rem; border-radius: var(--radius); font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 1rem; }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139, 95, 191, 0.3); }
+    .signup-link { text-align: center; color: var(--text-light); margin-top: 2rem; }
+    .signup-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .signup-link a:hover { text-decoration: underline; }
+    @media (max-width: 768px) { .login-box { flex-direction: column; } .login-left { padding: 2rem; } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="left">
-      <div class="overlay">
-        <div class="quote-box">
-          <h2>“Saving one animal won’t change the world,<br>
-          but it will change the world for that one animal.”</h2>
-          <p class="tagline">— Adopt. Love. Repeat. 🐾</p>
+ <nav class="navbar">
+    <div class="logo">PetVerse 🐾</div>
+    <ul>
+        <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+        <li><a href="pets.html" data-i18n="nav_adopt">Adopt</a></li>
+        <li><a href="volunteer.html" data-i18n="nav_volunteer">Volunteer</a></li>
+        <li><a href="donate.html" data-i18n="nav_donate">Donate</a></li>
+        <li><a href="community.html" data-i18n="nav_community">Community</a></li>
+        <li><a href="lost-found.html" data-i18n="nav_lost_found">Lost & Found</a></li>
+        <li><a href="login.html" id="loginLink" data-i18n="nav_login">Login / Signup</a></li>
+        <li><a href="myadoptions.html" data-i18n="nav_my_adoptions">My Adoptions</a></li>
+        <li id="logoutItem" style="display: none;">
+            <a href="javascript:void(0)" id="logoutLink" style="color: var(--secondary);" data-i18n="nav_logout">Logout</a>
+        </li>
+        <li>
+            <select id="languageSelect" onchange="changeLanguage(this.value)" style="background: var(--primary-light); color: white; border: none; padding: 0.5rem; border-radius: var(--radius);">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="kn">ಕನ್ನಡ</option>
+            </select>
+        </li>
+    </ul>
+</nav>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-left">
+        <div class="login-left-content">
+          <h2>Welcome to PetVerse</h2>
+          <p>"Saving one animal won't change the world, but it will change the world for that one animal."</p>
         </div>
       </div>
-    </div>
-
-    <div class="right">
-      <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" class="logo" alt="PetPal Logo">
-      <h1>Welcome Back!</h1>
-      <p>Login to your PetPal account and start your adoption journey 🐶💖</p>
-
-      <input type="text" id="username" placeholder="Enter your username">
-      <div class="password-wrapper">
-        <input type="password" id="password" placeholder="Enter your password">
-        <span class="toggle-pass" onclick="togglePassword()">👁</span>
-      </div>
-
-      <button onclick="login()">Login</button>
-
-      <div class="social-login">
-        <p style="margin-top:15px;color:#fffbe7;">Or continue with</p>
-        <button><img src="https://cdn-icons-png.flaticon.com/512/300/300221.png"> Google</button>
-        <button><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png"> Facebook</button>
-      </div>
-
-      <div class="create-account">
-        <p>New here? <a href="#">Create an Account</a></p>
+      
+      <div class="login-right">
+        <div class="login-logo">🐾</div>
+        <h1>Welcome Back!</h1>
+        <p class="login-subtitle">Login to your PetVerse account</p>
+        
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Email</label>
+            <input type="email" id="username" class="form-input" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-wrapper">
+              <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+              <button type="button" class="toggle-password" onclick="togglePassword()">👁</button>
+            </div>
+          </div>
+          <button type="submit" class="login-btn">Login</button>
+        </form>
+        
+        <div class="signup-link">
+          <p>New here? <a href="signup.html">Create an Account</a></p>
+        </div>
       </div>
     </div>
   </div>
@@ -286,34 +99,98 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const toast = document.getElementById("toast");
-
-    function showToast(message) {
-      toast.innerText = message;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 3000);
-    }
-
+    // Using global showToast from auth.js, which is loaded in the <head>
+    
     function togglePassword() {
-      const pass = document.getElementById("password");
-      pass.type = pass.type === "password" ? "text" : "password";
+      const password = document.getElementById("password");
+      const toggleBtn = document.querySelector('.toggle-password');
+      if (password.type === "password") {
+        password.type = "text";
+        toggleBtn.textContent = "🙈";
+      } else {
+        password.type = "password";
+        toggleBtn.textContent = "👁";
+      }
     }
 
-    function login() {
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value.trim();
+    // --- UPDATED THIS FUNCTION ---
+    async function handleEmailLogin(emailInput, password) {
+      const email = emailInput.trim();
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        
+        if (error) throw error; // Catches "Invalid login credentials"
+        
+        // This is the check for unconfirmed emails (if you have it turned on)
+        if (!data.session) {
+          showToast("Please check your email to confirm your account first.", "error");
+          return;
+        }
 
-      if (!user || !pass) {
-        showToast("Please fill in both fields!");
+        // --- NEW CODE: Fetch profile on login ---
+        try {
+          // After a successful login, fetch the user's profile
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('username, avatar_url') // Select username and avatar
+            .eq('id', data.user.id) // Match the logged-in user's ID
+            .single(); // We only expect one row
+
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
+          } else if (profile) {
+            // Save the fetched profile to localStorage
+            localStorage.setItem('petverse_profile', JSON.stringify(profile));
+          }
+        } catch (profileErr) {
+            console.error('Failed to fetch profile during login:', profileErr);
+        }
+        // --- End of new code ---
+
+        // If we get here, the login was fully successful.
+        showToast(`Welcome back! Redirecting...`, 'success');
+        
+        if (typeof updateAuthLinks === 'function') {
+           updateAuthLinks();
+        }
+        
+        setTimeout(() => { window.location.href = 'pets.html'; }, 900);
+      
+      } catch (err) {
+        showToast(err.message || 'Login failed. Check credentials or signup first.', 'error');
+      }
+    }
+
+    // --- Attach handlers (Login form only) ---
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const email = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      
+      if (!email || !password) {
+        showToast("Please fill in all fields!", 'error');
         return;
       }
+      handleEmailLogin(email, password);
+    });
 
-      localStorage.setItem("petpal_user", user);
-      showToast(`Welcome, ${user}! Redirecting...`);
-      setTimeout(() => {
-        window.location.href = "pets.html";
-      }, 1500);
-    }
+    // --- On page load logic (unchanged) ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const session = sessionData?.session ?? null;
+        if (session && session.user) {
+          showToast(`You are already logged in as ${session.user.email || session.user.id}. Redirecting...`, 'info');
+          if (typeof updateAuthLinks === 'function') updateAuthLinks();
+          setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+        } else {
+          if (typeof updateAuthLinks === 'function') updateAuthLinks();
+        }
+      } catch (err) {
+        console.error('Auth check failed', err);
+      }
+    });
   </script>
+  
 </body>
 </html>

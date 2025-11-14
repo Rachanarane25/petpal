@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account | PetVerse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="./supabase-client.js"></script>
+  
+  <script src="./auth.js" defer></script>
+  
+  <!-- Re-using the login page styles -->
+  <style>
+    .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-light), var(--primary)); padding: 2rem; }
+    .login-box { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; max-width: 900px; width: 100%; overflow: hidden; }
+    .login-left { flex: 1; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: var(--white); padding: 3rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
+    .login-left::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('./static/images/bruno.webp') center/cover; opacity: 0.1; }
+    .login-left-content { position: relative; z-index: 2; }
+    .login-left h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+    .login-right { flex: 1; padding: 3rem; display: flex; flex-direction: column; justify-content: center; }
+    .login-logo { width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--white); font-size: 2rem; }
+    .login-right h1 { text-align: center; color: var(--primary); margin-bottom: 0.5rem; font-size: 2rem; }
+    .login-subtitle { text-align: center; color: var(--text-light); margin-bottom: 2rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text); font-weight: 500; }
+    .form-input { width: 100%; padding: 0.8rem 1rem; border: 2px solid var(--primary-light); border-radius: var(--radius); }
+    .login-btn { width: 100%; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: var(--white); border: none; padding: 1rem; border-radius: var(--radius); font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .signup-link { text-align: center; color: var(--text-light); margin-top: 2rem; }
+    .signup-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    @media (max-width: 768px) { .login-box { flex-direction: column; } .login-left { padding: 2rem; } }
+
+    /* --- NEW CSS FOR OTP MODAL --- */
+    .otp-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .otp-modal-content {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .otp-modal-content h2 {
+      color: var(--primary);
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <!-- Your navbar HTML here -->
+  </nav>
+
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-left">
+        <div class="login-left-content">
+          <h2>Join PetVerse</h2>
+          <p>"Saving one animal won't change the world, but it will change the world for that one animal."</p>
+        </div>
+      </div>
+      
+      <!-- This is the container for both forms -->
+      <div class="login-right">
+        
+        <!-- Signup Form (Will be hidden after success) -->
+        <form id="signupForm">
+          <div class="login-logo">🐾</div>
+          <h1>Create Your Account</h1>
+          <p class="login-subtitle">Join our community of pet lovers</p>
+
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" class="form-input" placeholder="e.g., Yashas" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" class="form-input" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="Create a password (min 6 chars)" required>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+          </div>
+          <button type="submit" class="login-btn">Create Account</button>
+        </form>
+        
+        <div class="signup-link" id="loginLinkContainer">
+          <p>Already have an account? <a href="login.html">Login Here</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- --- NEW HIDDEN OTP MODAL --- -->
+  <div id="otpModal" class="otp-modal-overlay" style="display:none;">
+    <div class="otp-modal-content">
+      <h2>Check Your Email</h2>
+      <p>We sent a 6-digit code to your email. Please enter it below to verify your account.</p>
+      
+      <form id="otpForm">
+        <div class="form-group" style="text-align: left;">
+          <label for="otpEmail">Email</label>
+          <!-- This will be pre-filled and read-only -->
+          <input type="email" id="otpEmail" class="form-input" required readonly style="background: #eee;">
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label for="otp">6-Digit Code</label>
+          <input type="text" id="otp" class="form-input" placeholder="123456" required>
+        </div>
+        <button type="submit" class="login-btn">Verify Account</button>
+      </form>
+    </div>
+  </div>
+  <!-- ----------------------------- -->
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // --- Signup Form Logic ---
+    document.getElementById("signupForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+      if (!username || !email || !password || !confirmPassword) {
+        showToast("Please fill in all fields", "error");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showToast("Passwords do not match!", "error");
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: { username: username }
+          }
+        });
+
+        if (error) throw error;
+
+        // --- SUCCESS! SHOW THE MODAL ---
+        showToast("Signup successful! Please check your email for a 6-digit code.", "success");
+        
+        // Hide the signup form and the "Login Here" link
+        document.getElementById("signupForm").style.display = "none";
+        document.getElementById("loginLinkContainer").style.display = "none";
+        
+        // Show the OTP modal
+        document.getElementById("otpModal").style.display = "flex";
+        
+        // Pre-fill the email address in the modal
+        document.getElementById("otpEmail").value = email;
+
+      } catch (err) {
+        console.error('Signup error', err);
+        if (err.message.includes("User already registered")) {
+          showToast("An account with this email already exists. Please login.", "error");
+        } else if (err.message.includes("Password")) {
+          showToast(err.message, "error");
+        } else {
+          showToast(err.message || 'Signup failed. Please try again.', 'error');
+        }
+      }
+    });
+
+    // --- NEW: OTP Verification Logic ---
+    document.getElementById("otpForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById("otpEmail").value;
+      const token = document.getElementById("otp").value.trim();
+
+      if (!token) {
+        showToast("Please enter the 6-digit code", "error");
+        return;
+      }
+
+      try {
+        // This is the verification step from the docs
+        const { data, error } = await supabase.auth.verifyOtp({
+          email: email,
+          token: token,
+          type: 'signup' // IMPORTANT: Use 'signup' type for confirmation
+        });
+
+        if (error) throw error;
+        
+        // Success! The user is now confirmed AND logged in.
+        showToast("Account verified successfully! Redirecting...", "success");
+        
+        // This logic is from login.html. It saves the profile.
+        if (data.user) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('username, avatar_url')
+            .eq('id', data.user.id)
+            .single();
+          if (profile) {
+            localStorage.setItem('petverse_profile', JSON.stringify(profile));
+          }
+        }
+        
+        setTimeout(() => { window.location.href = 'pets.html'; }, 1500);
+
+      } catch (err) {
+        console.error('OTP Verification error:', err);
+        showToast(err.message || "Invalid or expired code.", "error");
+      }
+    });
+
+  </script>
+
+</body>
+</html>
