@@ -5,36 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PetVerse 🐾 | Adopt. Love. Repeat.</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="./style.css">
   <script type="module" src="./supabase-client.js"></script>
-
-<script src="./auth.js" defer></script>
-
+  <script src="./navigation.js" defer></script>
+  <script src="./auth.js" defer></script>
 </head>
 <body>
+ 
   <nav class="navbar">
-    <div class="logo">PetVerse 🐾</div>
-    <ul>
-        <li><a href="index.html" data-i18n="nav_home">Home</a></li>
-        <li><a href="pets.html" data-i18n="nav_adopt">Adopt</a></li>
-        <li><a href="volunteer.html" data-i18n="nav_volunteer">Volunteer</a></li>
-        <li><a href="donate.html" data-i18n="nav_donate">Donate</a></li>
-        <li><a href="community.html" data-i18n="nav_community">Community</a></li>
-        <li><a href="lost-found.html" data-i18n="nav_lost_found">Lost & Found</a></li>
-        <li><a href="login.html" id="loginLink" data-i18n="nav_login">Login / Signup</a></li>
-        <li><a href="myadoptions.html" data-i18n="nav_my_adoptions">My Adoptions</a></li>
-        <li id="logoutItem" style="display: none;">
-            <a href="javascript:void(0)" id="logoutLink" style="color: var(--secondary);" data-i18n="nav_logout">Logout</a>
-        </li>
-        <li>
-            <select id="languageSelect" onchange="changeLanguage(this.value)" style="background: var(--primary-light); color: white; border: none; padding: 0.5rem; border-radius: var(--radius);">
-                <option value="en">English</option>
-                <option value="hi">हिन्दी</option>
-                <option value="kn">ಕನ್ನಡ</option>
-            </select>
-        </li>
-    </ul>
+  <div class="logo">
+    <a href="./index.html" style="text-decoration: none;">
+      <img src="https://mregdwyqmjurjnforhxa.supabase.co/storage/v1/object/public/pet-images/IMG-20251114-WA0022%20(1).jpg"
+           alt="PetVerse Logo"
+           style="height: 60px; width: 60px; border-radius: 50%; object-fit: cover; display:block;">
+    </a>
+  </div>
+  <ul>
+    <li><a href="./index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="./pets.html" data-i18n="nav_adopt">Adopt</a></li>
+    <li><a href="./volunteer.html" data-i18n="nav_volunteer">Volunteer</a></li>
+    <li><a href="./donate.html" data-i18n="nav_donate">Donate</a></li>
+    <li><a href="./community.html" data-i18n="nav_community">Community</a></li>
+    <li><a href="./lost-found.html" data-i18n="nav_lost_found">Lost & Found</a></li>
+    
+    <li><a href="./myadoptions.html" data-i18n="nav_my_adoptions">My Adoptions</a></li>
+
+    <li id="loginLinkItem">
+      <a href="./login.html" id="loginLink" data-i18n="nav_login">Login / Signup</a>
+    </li>
+
+    <li>
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="kn">ಕನ್ನಡ</option>
+      </select>
+    </li>
+  </ul>
 </nav>
+
   <header class="hero">
     <div class="hero-content">
       <h1>Welcome to PetVerse!</h1>
@@ -42,7 +51,7 @@
     </div>
   </header>
 
-   <section class="features">
+  <section class="features">
     <div class="cards">
       <div class="card">
         <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Adoption">
@@ -73,14 +82,14 @@
       </div>
 
       <div class="card">
-        <img src="httpsa://cdn-icons-png.flaticon.com/512/616/616425.png" alt="Lost & Found">
+        <img src="https://cdn-icons-png.flaticon.com/512/616/616425.png" alt="Lost & Found">
         <h3>Lost & Found</h3>
         <p>Help reunite lost pets with their families or report found pets in your neighborhood.</p>
         <a href="lost-found.html" class="card-btn">View Reports</a>
       </div>
 
       <div class="card">
-        <img src="httpsia://cdn-icons-png.flaticon.com/512/616/616422.png" alt="My Adoptions">
+        <img src="https://cdn-icons-png.flaticon.com/512/616/616422.png" alt="My Adoptions">
         <h3>My Adoptions</h3>
         <p>View all the pets you've adopted and track your adoption journey with us.</p>
         <a href="myadoptions.html" class="card-btn">View My Pets</a>
@@ -93,9 +102,9 @@
   </footer>
 
   <div id="toast" class="toast"></div>
-  <div id="toast" class="toast"></div>
 
-  <div data-i18n-skip> <div id="chatbotFloatingIcon"
+  <div data-i18n-skip>
+    <div id="chatbotFloatingIcon"
          style="width:60px;height:60px;background:linear-gradient(135deg,#9b59b6,#c39bd3);
                 border-radius:50%;position:fixed;bottom:25px;right:25px;
                 display:none;justify-content:center;align-items:center;cursor:pointer;
@@ -123,5 +132,5 @@
     </div>
   </div>
 
-  </body>
+</body>
 </html>

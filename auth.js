@@ -1,14 +1,19 @@
 /*
-  auth.js - Global Supabase Authentication, Translation & Chatbot Helper
+  auth.js - Global Supabase Authentication & Translation Helper
   Handles:
-  - Auth (Login, Logout, Profile Avatar)
+  - Global `showToast` utility
+  - Automatic UI updates for login/logout (navbar)
+  - Displaying user profile (username & avatar)
+  - Secure logout
   - Multi-language translation
-  - Toast notifications
-  - Floating AI Chatbot logic
 */
 
 // --- 1. TRANSLATION LOGIC ---
+
 const translations = {
+  // ----------------------------
+  // 🇬🇧 ENGLISH
+  // ----------------------------
   en: {
     title_home: "PetVerse 🐾 | Adopt. Love. Repeat.",
     logo_name: "PetVerse 🐾",
@@ -39,7 +44,7 @@ const translations = {
     lost_desc: "Help reunite lost pets.",
     lost_btn: "View Reports",
     my_adopt_title: "My Adoptions",
-    my_adopt_desc: "Track all pets you’ve adopted.",
+    my_adopt_desc: "Track all pets you've adopted.",
     my_adopt_btn: "View My Pets",
     footer_text: "© 2025 PetVerse — Adopt. Love. Care. 🐾",
     title_adopt: "Adopt a Pet | PetVerse",
@@ -268,7 +273,7 @@ const translations = {
     logo_name: "PetVerse 🐾",
     nav_home: "ಮುಖಪುಟ",
     nav_adopt: "ದತ್ತು ಪಡೆಯಿರಿ",
-    nav_volunteer: "ಸ್ವಯంಸೇವಕ",
+    nav_volunteer: "ಸ್ವಯಂಸೇವಕ",
     nav_donate: "ದೇಣಿಗೆ ನೀಡಿ",
     nav_community: "ಸಮುದಾಯ",
     nav_lost_found: "ಲಾಸ್ಟ್ & ಫೌಂಡ್",
@@ -449,20 +454,24 @@ function injectProfileStyles() {
   const style = document.createElement('style');
   style.textContent = `
     .navbar-avatar, .navbar-avatar-default {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid var(--primary-light);
       background-color: var(--primary-light);
       color: var(--white);
       font-weight: 600;
-      font-size: 16px;
+      font-size: 1.1rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0;
+      transition: transform 0.3s ease;
+    }
+    #profile-avatar-button:hover .navbar-avatar,
+    #profile-avatar-button:hover .navbar-avatar-default {
+        transform: scale(1.1);
     }
     .profile-menu-container { position: relative; }
     .profile-dropdown {
@@ -472,16 +481,18 @@ function injectProfileStyles() {
       right: 0;
       background: var(--white);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-lg);
       min-width: 220px;
-      z-index: 100;
-      border: 1px solid var(--background);
+      z-index: 10001;
+      border: 1px solid rgba(0,0,0,0.05);
       overflow: hidden;
+      animation: fadeIn 0.2s ease;
     }
     .profile-dropdown.active { display: block; }
     .profile-dropdown-header {
       padding: 1rem;
       border-bottom: 1px solid var(--background);
+      background: #fafafa;
     }
     .profile-dropdown-header .username {
       font-weight: 600;
@@ -499,11 +510,19 @@ function injectProfileStyles() {
       padding: 0.8rem 1rem;
       color: var(--text);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       cursor: pointer;
+      border-bottom: 1px solid var(--background);
+      transition: background 0.2s;
     }
-    .profile-dropdown-item:hover { background: var(--background); }
-    .profile-dropdown-item.logout { color: #ff6b6b; }
+    .profile-dropdown-item:hover { 
+        background: var(--background); 
+        color: var(--primary);
+    }
+    .profile-dropdown-item.logout { 
+        color: #ff6b6b; 
+        border-bottom: none;
+    }
   `;
   document.head.appendChild(style);
 }
@@ -555,8 +574,6 @@ async function fetchAndCacheProfile(userId) {
 }
 
 async function updateAuthLinks() {
-  // Check if supabase is defined. If not, wait a tiny bit.
-  // This is a failsafe for script loading order.
   if (typeof supabase === 'undefined') {
     console.warn("Supabase not defined yet, retrying auth link update...");
     setTimeout(updateAuthLinks, 100);
@@ -572,15 +589,23 @@ async function updateAuthLinks() {
   const logoutItem = document.getElementById("logoutItem");
   let profileMenu = document.getElementById('profile-menu-container');
   
+  // Hide any locally hardcoded dropdown items (cleanup)
+  const localDropdown = document.getElementById('userDropdownItem');
+  const localUserMenu = document.getElementById('userDropdown');
+  
   const chatIcon = document.getElementById("chatbotFloatingIcon");
 
   if (user) {
     // --- USER IS LOGGED IN ---
-    
     if (chatIcon) chatIcon.style.display = "flex";
-
+    
+    // Hide "Login/Signup"
     if (loginLinkItem) loginLinkItem.style.display = 'none';
     if (logoutItem) logoutItem.style.display = 'none';
+    
+    // Cleanup old HTML
+    if (localDropdown) localDropdown.style.display = 'none';
+    if (localUserMenu) localUserMenu.style.display = 'none';
     
     let profile = JSON.parse(localStorage.getItem('petverse_profile'));
     
@@ -601,16 +626,15 @@ async function updateAuthLinks() {
     
     let avatarButtonHtml = '';
     if (avatarUrl) {
-      avatarButtonHtml = `<img src="${avatarUrl}" alt="${displayName}" class="profile-avatar-button">`;
+      avatarButtonHtml = `<img src="${avatarUrl}" alt="${displayName}" class="navbar-avatar">`;
     } else {
       const firstLetter = displayName.charAt(0).toUpperCase();
-      // --- THIS IS THE FIX ---
-      // The class name now matches the CSS in injectProfileStyles()
       avatarButtonHtml = `<div class="navbar-avatar-default">${firstLetter}</div>`;
     }
 
+    // --- DROPDOWN CONTENT (Profile Only) ---
     profileMenu.innerHTML = `
-      <div id="profile-avatar-button">
+      <div id="profile-avatar-button" style="cursor:pointer;">
         ${avatarButtonHtml}
       </div>
       <div id="profile-dropdown-menu" class="profile-dropdown">
@@ -618,8 +642,9 @@ async function updateAuthLinks() {
           <span class="username">${displayName}</span>
           <span class="email">${email}</span>
         </div>
+        <a href="./profile.html" class="profile-dropdown-item">👤 My Profile</a>
         <a id="profile-logout-button" class="profile-dropdown-item logout">
-          Logout
+          🚪 Logout
         </a>
       </div>
     `;
@@ -635,16 +660,17 @@ async function updateAuthLinks() {
 
   } else {
     // --- USER IS LOGGED OUT ---
-    
     if (chatIcon) chatIcon.style.display = "none";
-
+    
+    // Show "Login/Signup"
     if (loginLinkItem) loginLinkItem.style.display = 'block';
     if (logoutItem) logoutItem.style.display = 'none';
+    
     if (profileMenu) profileMenu.remove();
   }
 }
 
-// --- 4. CHATBOT LOGIC (Merged from chatbot_floating.js) ---
+// --- 4. CHATBOT LOGIC ---
 
 let chatbotLang = null;
 
@@ -726,7 +752,7 @@ function initializeChatbot() {
   const sendBtn = document.getElementById("sendChatBtnAI");
 
   if (!chatIcon || !panel || !chatInput || !sendBtn) {
-    console.warn("Chatbot HTML elements not found. Chatbot will not initialize.");
+    // console.warn("Chatbot HTML elements not found. Chatbot will not initialize.");
     return;
   }
 
@@ -755,7 +781,55 @@ function initializeChatbot() {
   });
 }
 
-// --- 5. INITIALIZATION ---
+// --- 5. GLOBAL VARIABLES AND AUTH READY EVENT ---
+
+window.currentUser = null;
+window.currentProfile = null;
+
+async function initializeAuth() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        window.currentUser = user;
+        
+        if (user) {
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+            
+            if (!error && profile) {
+                window.currentProfile = profile;
+            } else {
+                console.warn('Profile not found for user:', user.id);
+            }
+        }
+        
+        const authReadyEvent = new CustomEvent('authReady', {
+            detail: {
+                user: window.currentUser,
+                profile: window.currentProfile
+            }
+        });
+        
+        window.dispatchEvent(authReadyEvent);
+        console.log('✅ Auth Ready Event Dispatched', { user: window.currentUser, profile: window.currentProfile });
+        
+    } catch (error) {
+        console.error('Error initializing auth:', error);
+        
+        const authReadyEvent = new CustomEvent('authReady', {
+            detail: {
+                user: null,
+                profile: null
+            }
+        });
+        window.dispatchEvent(authReadyEvent);
+    }
+}
+
+// --- 6. INITIALIZATION ---
 
 try {
   supabase.auth.onAuthStateChange((event, session) => {
@@ -763,14 +837,17 @@ try {
     if (event === "SIGNED_OUT") {
       localStorage.removeItem('petverse_profile');
     }
-    updateAuthLinks(); // This will now also show/hide the chatbot icon
+    updateAuthLinks();
+    
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        initializeAuth();
+    }
   });
 } catch (error) {
   console.error("Error setting up onAuthStateChange:", error);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Make sure supabase is loaded before running this
   if (typeof supabase === 'undefined') {
     console.warn("Supabase not defined yet, retrying init...");
     setTimeout(() => document.dispatchEvent(new Event('DOMContentLoaded')), 100);
@@ -782,6 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeLanguage();
     updateAuthLinks();
     initializeChatbot();
+    initializeAuth();
   } catch (error) {
     console.error("Error during initial auth setup:", error);
   }

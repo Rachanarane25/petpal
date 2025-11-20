@@ -1,346 +1,1039 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lost & Found | PetVerse</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
-  <script type="module" src="./supabase-client.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title.lost_found">Lost & Found | PetVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>">
+    <script type="module" src="./supabase-client.js"></script>
+    <script src="./auth.js" defer></script>
+    <script src="./translation.js" defer></script>
+    <script src="./chatbot_floating.js" defer></script>
+    <script src="./loading.js" defer></script>
+    <script src="./navigation.js" defer></script>
 
-<script src="./auth.js" defer></script>
-  <style>
-    /* All your existing styles are kept exactly as-is */
-    .lost-found-container {
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 0 2rem;
-    }
 
-    .report-section {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 2rem;
-      margin-bottom: 2rem;
-    }
+    <style>
+        .lost-found-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
+        .form-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 3rem;
+        }
 
-    .form-group {
-      margin-bottom: 1rem;
-    }
+        .form-section h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
 
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-      font-weight: 500;
-    }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%;
-      padding: 0.8rem;
-      border: 2px solid var(--primary-light);
-      border-radius: var(--radius);
-      font-size: 1rem;
-    }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
 
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
 
-    .reports-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
-    }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.8rem;
+            border: 2px solid var(--primary-light);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
 
-    .report-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 95, 191, 0.1);
+        }
 
-    .report-card.lost {
-      border-left: 4px solid #ff6b6b;
-    }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
 
-    .report-card.found {
-      border-left: 4px solid var(--accent);
-    }
+        .full-width {
+            grid-column: 1 / -1;
+        }
 
-    .report-image {
-      width: 100%;
-      height: 200px;
-      background: var(--background);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-light);
-    }
+        /* Image upload styling */
+        .image-upload-container {
+            position: relative;
+            border: 2px dashed var(--primary-light);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
 
-    .report-content {
-      padding: 1.5rem;
-    }
+        .image-upload-container:hover {
+            border-color: var(--primary);
+            background: var(--background);
+        }
 
-    .report-status {
-      display: inline-block;
-      padding: 0.3rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
+        .image-upload-container input[type="file"] {
+            display: none;
+        }
 
-    .status-lost {
-      background: #ff6b6b;
-      color: white;
-    }
+        .upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
 
-    .status-found {
-      background: var(--accent);
-      color: white;
-    }
+        .upload-icon {
+            font-size: 3rem;
+        }
 
-    .contact-info {
-      background: var(--background);
-      padding: 1rem;
-      border-radius: var(--radius);
-      margin-top: 1rem;
-    }
-  </style>
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: var(--radius);
+            margin-top: 1rem;
+        }
+
+        .remove-image-btn {
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+
+        .uploading-indicator {
+            display: none;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .reports-section {
+            margin-top: 3rem;
+        }
+
+        .reports-section h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .report-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .report-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .report-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .report-image:hover {
+            opacity: 0.8;
+            transform: scale(1.02);
+        }
+
+        .report-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            z-index: 1;
+        }
+
+        .report-badge.lost {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .report-badge.found {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .report-card h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .report-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            color: var(--text);
+        }
+
+        .report-detail strong {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .report-description {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--background);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .contact-btn {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .contact-btn:hover {
+            background: var(--secondary);
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.8rem;
+            z-index: 1;
+        }
+
+        .delete-btn:hover {
+            background: #e74c3c;
+        }
+
+        .login-prompt {
+            text-align: center;
+            padding: 3rem;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .login-prompt h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .report-time {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            animation: slideDown 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            color: var(--text-light);
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--secondary);
+        }
+
+        #modalTitle {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            margin-top: 0;
+        }
+
+        #modalBody {
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        #modalBody p {
+            margin: 0.8rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #modalBody strong {
+            color: var(--primary);
+            min-width: 80px;
+        }
+
+        /* Image Lightbox Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 10001;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-image-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 85vh;
+            object-fit: contain;
+            animation: zoom 0.3s;
+        }
+
+        @keyframes zoom {
+            from {transform: scale(0.7)}
+            to {transform: scale(1)}
+        }
+
+        .image-modal .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .image-modal .close-modal:hover,
+        .image-modal .close-modal:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 20% auto;
+                width: 95%;
+            }
+
+            .modal-image-content {
+                max-width: 95%;
+                max-height: 80vh;
+            }
+
+            .image-modal .close-modal {
+                top: 10px;
+                right: 15px;
+                font-size: 30px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <nav class="navbar">
-    <div class="logo">PetVerse 🐾</div>
-    <ul>
-        <li><a href="index.html" data-i18n="nav_home">Home</a></li>
-        <li><a href="pets.html" data-i18n="nav_adopt">Adopt</a></li>
-        <li><a href="volunteer.html" data-i18n="nav_volunteer">Volunteer</a></li>
-        <li><a href="donate.html" data-i18n="nav_donate">Donate</a></li>
-        <li><a href="community.html" data-i18n="nav_community">Community</a></li>
-        <li><a href="lost-found.html" data-i18n="nav_lost_found">Lost & Found</a></li>
-        <li><a href="login.html" id="loginLink" data-i18n="nav_login">Login / Signup</a></li>
-        <li><a href="myadoptions.html" data-i18n="nav_my_adoptions">My Adoptions</a></li>
-        <li id="logoutItem" style="display: none;">
-            <a href="javascript:void(0)" id="logoutLink" style="color: var(--secondary);" data-i18n="nav_logout">Logout</a>
-        </li>
-        <li>
-            <select id="languageSelect" onchange="changeLanguage(this.value)" style="background: var(--primary-light); color: white; border: none; padding: 0.5rem; border-radius: var(--radius);">
-                <option value="en">English</option>
-                <option value="hi">हिन्दी</option>
-                <option value="kn">ಕನ್ನಡ</option>
-            </select>
-        </li>
-    </ul>
+
+<nav class="navbar">
+  <div class="logo">
+    <a href="./index.html" style="text-decoration: none;">
+      <img src="https://mregdwyqmjurjnforhxa.supabase.co/storage/v1/object/public/pet-images/IMG-20251114-WA0022%20(1).jpg"
+           alt="PetVerse Logo"
+           style="height: 60px; width: 60px; border-radius: 50%; object-fit: cover; display:block;">
+    </a>
+  </div>
+  <ul>
+    <li><a href="./index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="./pets.html" data-i18n="nav_adopt">Adopt</a></li>
+    <li><a href="./volunteer.html" data-i18n="nav_volunteer">Volunteer</a></li>
+    <li><a href="./donate.html" data-i18n="nav_donate">Donate</a></li>
+    <li><a href="./community.html" data-i18n="nav_community">Community</a></li>
+    <li><a href="./lost-found.html" data-i18n="nav_lost_found">Lost & Found</a></li>
+    
+    <li><a href="./myadoptions.html" data-i18n="nav_my_adoptions">My Adoptions</a></li>
+
+    <li id="loginLinkItem">
+      <a href="./login.html" id="loginLink" data-i18n="nav_login">Login / Signup</a>
+    </li>
+
+    <li>
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="kn">ಕನ್ನಡ</option>
+      </select>
+    </li>
+  </ul>
 </nav>
 
-  <div class="hero">
-    <h1>Lost & Found Pets</h1>
-    <p>Help reunite lost pets with their families</p>
-  </div>
+    <!-- HEADER -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1 data-i18n="lost.title">Lost & Found Pets</h1>
+            <p data-i18n="lost.subtitle">Help reunite lost pets with their families ❤️</p>
+        </div>
+    </header>
 
-  <div class="lost-found-container">
-    <div class="report-section">
-      <h2 style="color: var(--primary); margin-bottom: 1.5rem;">Report a Lost or Found Pet</h2>
-      <form id="reportForm">
-        <div class="form-group">
-          <label>Report Type</label>
-          <select id="reportType" required>
-            <option value="">Select type</option>
-            <option value="lost">I Lost My Pet</option>
-            <option value="found">I Found a Pet</option>
-          </select>
+    <!-- MAIN CONTENT -->
+    <div class="lost-found-container">
+        <!-- Report Form Section (Only for logged-in users) -->
+        <div id="reportFormSection" class="form-section" style="display: none;">
+            <h2>Report a Lost or Found Pet</h2>
+            <form id="reportForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="reportType">Report Type *</label>
+                        <select id="reportType" required>
+                            <option value="">Select type</option>
+                            <option value="lost">I Lost My Pet</option>
+                            <option value="found">I Found a Pet</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="petName">Pet Name *</label>
+                        <input type="text" id="petName" required placeholder="Enter pet's name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="petType">Pet Type *</label>
+                        <select id="petType" required>
+                            <option value="">Select type</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Bird">Bird</option>
+                            <option value="Rabbit">Rabbit</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="breed">Breed</label>
+                        <input type="text" id="breed" placeholder="Enter breed (optional)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="color">Color *</label>
+                        <input type="text" id="color" required placeholder="Enter color">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Last Seen Location *</label>
+                        <input type="text" id="location" required placeholder="Enter location">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dateLostFound">Date Lost/Found *</label>
+                        <input type="date" id="dateLostFound" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactPhone">Contact Phone *</label>
+                        <input type="tel" id="contactPhone" required placeholder="Enter phone number">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="description">Additional Details</label>
+                        <textarea id="description" placeholder="Describe your pet, distinctive features, collar details, etc."></textarea>
+                    </div>
+
+                    <!-- IMAGE UPLOAD SECTION -->
+                    <div class="form-group full-width">
+                        <label>Pet Photo (Optional)</label>
+                        <div class="image-upload-container" id="imageUploadContainer">
+                            <input type="file" id="petImage" accept="image/*">
+                            <label for="petImage" class="upload-label" id="uploadLabel">
+                                <span class="upload-icon">📷</span>
+                                <span>Click to upload a photo of your pet</span>
+                                <span style="font-size: 0.8rem; color: var(--text-light);">Max size: 5MB</span>
+                            </label>
+                            <div id="imagePreviewContainer" style="display: none;">
+                                <img id="imagePreview" class="image-preview" alt="Pet preview">
+                                <button type="button" class="remove-image-btn" id="removeImageBtn">Remove Photo</button>
+                            </div>
+                        </div>
+                        <div class="uploading-indicator" id="uploadingIndicator">
+                            ⏳ Uploading image...
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="primary-btn" id="submitBtn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                    Submit Report 📝
+                </button>
+            </form>
         </div>
 
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Pet Name</label>
-            <input type="text" id="petName" required>
-          </div>
-          <div class="form-group">
-            <label>Pet Type</label>
-            <select id="petType" required>
-              <option value="">Select type</option>
-              <option value="dog">Dog</option>
-              <option value="cat">Cat</option>
-              <option value="bird">Bird</option>
-              <option value="rabbit">Rabbit</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+        <!-- Login Prompt (for guests) -->
+        <div id="loginPrompt" class="login-prompt">
+            <h3>Help Reunite Pets! 🐾</h3>
+            <p>Login to report a lost or found pet.</p>
+            <a href="./login.html" class="primary-btn" style="text-decoration: none; display: inline-block; margin-top: 1rem;">Login / Sign Up</a>
         </div>
 
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Breed</label>
-            <input type="text" id="petBreed">
-          </div>
-          <div class="form-group">
-            <label>Color</label>
-            <input type="text" id="petColor" required>
-          </div>
+        <!-- Recent Reports Section -->
+        <div class="reports-section">
+            <h2>Recent Reports</h2>
+            <div id="reportsContainer" class="reports-grid">
+                <div style="text-align: center; padding: 2rem; color: var(--text-light); grid-column: 1 / -1;">
+                    Loading reports... 🐾
+                </div>
+            </div>
         </div>
-
-        <div class="form-group">
-          <label>Last Seen Location</label>
-          <input type="text" id="location" placeholder="Street, Area, Landmark" required>
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Date Lost/Found</label>
-            <input type="date" id="date" required>
-          </div>
-          <div class="form-group">
-            <label>Contact Phone</label>
-            <input type="tel" id="contactPhone" required>
-          </div>
-        </div>
-
-        <div class="form-group full-width">
-          <label>Additional Details</label>
-          <textarea id="description" rows="3" placeholder="Describe your pet, distinctive features, collar details, etc."></textarea>
-        </div>
-
-        <button type="submit" style="background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: var(--white); border: none; padding: 1rem 2rem; border-radius: var(--radius); font-weight: 600; cursor: pointer; width: 100%;">
-          Submit Report
-        </button>
-      </form>
     </div>
 
-    <div>
-      <h2 style="color: var(--primary); margin-bottom: 1.5rem;">Recent Reports</h2>
-      <div class="reports-grid" id="reportsContainer">
-        <p>Loading reports...</p>
+    <!-- Contact Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2 id="modalTitle">Contact Information</h2>
+            <div id="modalBody"></div>
+            <button class="primary-btn" id="modalCloseBtn" style="width: 100%; margin-top: 1rem;">OK</button>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="imageModal" class="modal image-modal">
+        <span class="close-modal" id="closeImageModal">&times;</span>
+        <img class="modal-image-content" id="modalImage">
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <
+
+    <script type="module">
+        const reportFormSection = document.getElementById('reportFormSection');
+        const loginPrompt = document.getElementById('loginPrompt');
+        const reportForm = document.getElementById('reportForm');
+        const reportsContainer = document.getElementById('reportsContainer');
+        const petImageInput = document.getElementById('petImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const uploadLabel = document.getElementById('uploadLabel');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const uploadingIndicator = document.getElementById('uploadingIndicator');
+        const submitBtn = document.getElementById('submitBtn');
+
+        let uploadedImageUrl = null;
+
+        // Toast function
+        function showToast(message, type = 'info') {
+            if (window.showToast && typeof window.showToast === 'function') {
+                window.showToast(message, type);
+                return;
+            }
+            
+            let toast = document.getElementById("toast");
+            if (!toast) {
+                toast = document.createElement("div");
+                toast.id = "toast";
+                toast.className = "toast";
+                document.body.appendChild(toast);
+            }
+            toast.innerText = message;
+            toast.style.background = type === 'error' ? '#ff6b6b' : 
+                                    type === 'success' ? '#4CAF50' : '#8B5FBF';
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 3000);
+        }
+
+        // Image preview
+        petImageInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image size must be less than 5MB', 'error');
+                petImageInput.value = '';
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showToast('Please upload an image file', 'error');
+                petImageInput.value = '';
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                uploadLabel.style.display = 'none';
+                imagePreviewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Remove image
+        removeImageBtn.addEventListener('click', () => {
+            petImageInput.value = '';
+            imagePreview.src = '';
+            uploadLabel.style.display = 'flex';
+            imagePreviewContainer.style.display = 'none';
+            uploadedImageUrl = null;
+        });
+
+        // Open image in modal
+        window.openImageModal = (imageUrl) => {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            modal.style.display = 'block';
+            modalImg.src = imageUrl;
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🔄 Lost & Found page initializing...');
+            
+            if (typeof supabase === 'undefined') {
+                console.error('Supabase not loaded!');
+                return;
+            }
+
+            // Get current user
+            const { data: { user } } = await supabase.auth.getUser();
+            window.currentUser = user;
+            
+            if (user) {
+                // Fetch profile
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+                
+                window.currentProfile = profile;
+                
+                // Show form
+                reportFormSection.style.display = 'block';
+                loginPrompt.style.display = 'none';
+            } else {
+                reportFormSection.style.display = 'none';
+                loginPrompt.style.display = 'block';
+            }
+            
+            // Load reports
+            await loadReports();
+            
+            // Set up form submission
+            reportForm.onsubmit = submitReport;
+            
+            // Modal close handlers
+            const modal = document.getElementById('contactModal');
+            const closeModal = document.getElementById('closeModal');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+            
+            closeModal.onclick = () => {
+                modal.style.display = 'none';
+            };
+            
+            modalCloseBtn.onclick = () => {
+                modal.style.display = 'none';
+            };
+            
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            // Image modal close handlers
+            const imageModal = document.getElementById('imageModal');
+            const closeImageModal = document.getElementById('closeImageModal');
+            
+            closeImageModal.onclick = () => {
+                imageModal.style.display = 'none';
+            };
+            
+            imageModal.onclick = (event) => {
+                if (event.target === imageModal) {
+                    imageModal.style.display = 'none';
+                }
+            };
+            
+            // Close with Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    if (imageModal.style.display === 'block') {
+                        imageModal.style.display = 'none';
+                    }
+                    if (modal.style.display === 'block') {
+                        modal.style.display = 'none';
+                    }
+                }
+            });
+            
+            console.log('✅ Lost & Found page initialized');
+        });
+
+        // Upload image to Supabase Storage
+        async function uploadImage(file, userId) {
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${userId}/${Date.now()}.${fileExt}`;
+                
+                uploadingIndicator.style.display = 'block';
+                submitBtn.disabled = true;
+
+                const { data, error } = await supabase.storage
+                    .from('lost-found-images')
+                    .upload(fileName, file);
+
+                if (error) throw error;
+
+                // Get public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('lost-found-images')
+                    .getPublicUrl(fileName);
+
+                uploadingIndicator.style.display = 'none';
+                submitBtn.disabled = false;
+
+                return publicUrl;
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                uploadingIndicator.style.display = 'none';
+                submitBtn.disabled = false;
+                throw error;
+            }
+        }
+
+        // Load reports from database
+        async function loadReports() {
+            reportsContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-light); grid-column: 1 / -1;">Loading reports... 🐾</div>';
+            
+            try {
+                const { data: reports, error } = await supabase
+                    .from('lost_found_pets')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+
+                if (error) throw error;
+                
+                displayReports(reports);
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                reportsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #ff6b6b; grid-column: 1 / -1;">
+                        <h3>Failed to load reports</h3>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" class="primary-btn" style="margin-top: 1rem;">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Display reports
+        function displayReports(reports) {
+            if (!reports || reports.length === 0) {
+                reportsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-light); grid-column: 1 / -1;">
+                        <h3>No reports yet</h3>
+                        <p>Be the first to report a lost or found pet! 🐾</p>
+                    </div>
+                `;
+                return;
+            }
+
+            reportsContainer.innerHTML = reports.map(report => {
+                const user = window.currentUser;
+                const userOwnsReport = user && report.user_id === user.id;
+                const reportDate = new Date(report.date_lost_found).toLocaleDateString();
+                const createdDate = new Date(report.created_at).toLocaleDateString();
+
+                return `
+                    <div class="report-card">
+                        ${userOwnsReport ? `<button class="delete-btn" onclick="deleteReport(${report.id}, '${report.image_url || ''}')">🗑️ Delete</button>` : ''}
+                        <span class="report-badge ${report.report_type}">${report.report_type === 'lost' ? 'LOST' : 'FOUND'}</span>
+                        ${report.image_url ? `<img src="${report.image_url}" class="report-image" alt="${escapeHtml(report.pet_name)}" onclick="openImageModal('${report.image_url}')" title="Click to view full size">` : ''}
+                        <h3>${escapeHtml(report.pet_name)}</h3>
+                        <div class="report-detail">
+                            <strong>Type:</strong> ${report.pet_type}
+                        </div>
+                        ${report.breed ? `<div class="report-detail"><strong>Breed:</strong> ${escapeHtml(report.breed)}</div>` : ''}
+                        <div class="report-detail">
+                            <strong>Color:</strong> ${escapeHtml(report.color)}
+                        </div>
+                        <div class="report-detail">
+                            <strong>Location:</strong> ${escapeHtml(report.location)}
+                        </div>
+                        <div class="report-detail">
+                            <strong>Date:</strong> ${reportDate}
+                        </div>
+                        ${report.description ? `<div class="report-description">${escapeHtml(report.description)}</div>` : ''}
+                        <button class="contact-btn" onclick="showContact('${report.contact_phone}', '${escapeHtml(report.user_name)}', '${report.report_type}')">
+                            ${report.report_type === 'lost' ? '📞 Contact Pet Owner' : '📞 Contact Finder'}
+                        </button>
+                        <div class="report-time">Posted on ${createdDate}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Submit report
+        async function submitReport(e) {
+            e.preventDefault();
+            
+            const user = window.currentUser;
+            const profile = window.currentProfile;
+            
+            if (!user) {
+                showToast('Please login to submit a report', 'error');
+                setTimeout(() => { window.location.href = './login.html'; }, 1000);
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting... ⏳';
+
+            try {
+                // Upload image if selected
+                let imageUrl = null;
+                const imageFile = petImageInput.files[0];
+                if (imageFile) {
+                    imageUrl = await uploadImage(imageFile, user.id);
+                }
+
+                const reportData = {
+                    report_type: document.getElementById('reportType').value,
+                    pet_name: document.getElementById('petName').value,
+                    pet_type: document.getElementById('petType').value,
+                    breed: document.getElementById('breed').value || null,
+                    color: document.getElementById('color').value,
+                    location: document.getElementById('location').value,
+                    date_lost_found: document.getElementById('dateLostFound').value,
+                    contact_phone: document.getElementById('contactPhone').value,
+                    description: document.getElementById('description').value || null,
+                    image_url: imageUrl,
+                    user_id: user.id,
+                    user_name: profile.username
+                };
+
+                const { error } = await supabase
+                    .from('lost_found_pets')
+                    .insert(reportData);
+
+                if (error) throw error;
+
+                showToast('Report submitted successfully!', 'success');
+                reportForm.reset();
+                uploadLabel.style.display = 'flex';
+                imagePreviewContainer.style.display = 'none';
+                uploadedImageUrl = null;
+                await loadReports();
+            } catch (error) {
+                console.error('Error submitting report:', error);
+                showToast(error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Report 📝';
+            }
+        }
+
+        // Delete report
+        window.deleteReport = async (reportId, imageUrl) => {
+            if (!confirm('Are you sure you want to delete this report?')) return;
+
+            try {
+                // Delete image from storage if exists
+                if (imageUrl) {
+                    const urlParts = imageUrl.split('/lost-found-images/');
+                    if (urlParts.length > 1) {
+                        const filePath = urlParts[1];
+                        await supabase.storage
+                            .from('lost-found-images')
+                            .remove([filePath]);
+                    }
+                }
+
+                // Delete report from database
+                const { error } = await supabase
+                    .from('lost_found_pets')
+                    .delete()
+                    .eq('id', reportId);
+
+                if (error) throw error;
+
+                showToast('Report deleted successfully!', 'success');
+                await loadReports();
+            } catch (error) {
+                console.error('Error deleting report:', error);
+                showToast(error.message, 'error');
+            }
+        };
+
+        // Show contact information in modal
+        window.showContact = (phone, userName, reportType) => {
+            const modal = document.getElementById('contactModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            // Different title and content based on report type
+            if (reportType === 'lost') {
+                modalTitle.textContent = 'Contact Pet Owner';
+                modalBody.innerHTML = `
+                    <p><strong>Owner:</strong> ${userName}</p>
+                    <p><strong>Phone:</strong> <a href="tel:${phone}" style="color: var(--primary); text-decoration: none;">${phone}</a></p>
+                    <p style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--background); color: var(--text-light); font-size: 0.9rem;">
+                        🐾 Please call to help reunite this pet with their owner!
+                    </p>
+                `;
+            } else {
+                modalTitle.textContent = 'Contact Pet Finder';
+                modalBody.innerHTML = `
+                    <p><strong>Finder:</strong> ${userName}</p>
+                    <p><strong>Phone:</strong> <a href="tel:${phone}" style="color: var(--primary); text-decoration: none;">${phone}</a></p>
+                    <p style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--background); color: var(--text-light); font-size: 0.9rem;">
+                        🐾 This person has found a pet. Call to check if it's yours!
+                    </p>
+                `;
+            }
+            
+            modal.style.display = 'block';
+        };
+
+        // Escape HTML
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+    <div data-i18n-skip>
+    <div id="chatbotFloatingIcon"
+         style="width:60px;height:60px;background:linear-gradient(135deg,#9b59b6,#c39bd3);
+                border-radius:50%;position:fixed;bottom:25px;right:25px;
+                display:none; /* Hidden by default, auth.js will show it if logged in */
+                justify-content:center;align-items:center;cursor:pointer;
+                box-shadow:0 5px 15px rgba(0,0,0,0.3);z-index:9999;">
+      <span style="font-size:28px;">🤖</span>
+    </div>
+
+    <div id="chatbotPanel"
+         style="width:350px;height:500px;background:white;border-radius:20px;
+                position:fixed;bottom:100px;right:25px;display:none;
+                flex-direction:column;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.25);
+                z-index:10000;">
+      <div style="padding:15px;background:#9b59b6;color:white;display:flex;align-items:center;gap:10px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/620/620851.png"
+             style="width:36px;height:36px;border-radius:50%;border:2px solid white;">
+        <strong>PetVerse AI Assistant 🐾</strong>
+      </div>
+      <div id="chatMessagesAI" style="flex:1;padding:10px;overflow-y:auto;background:#f8f0ff;"></div>
+      <div style="padding:10px;background:white;display:flex;gap:8px;">
+        <input id="chatInputAI" type="text" placeholder="Type your message…"
+               style="flex:1;padding:10px;border-radius:15px;border:1px solid #d5c4e6;">
+        <button id="sendChatBtnAI"
+                style="background:#9b59b6;color:white;border:none;padding:10px 14px;border-radius:14px;">➤</button>
       </div>
     </div>
   </div>
-
-  <div id="toast" class="toast"></div>
-
-  <script>
-    // REMOVED: updateAuthLinks() and logout() - now handled by auth.js
-    
-    // Kept this local utility function
-    function showToast(message) {
-      const toast = document.getElementById("toast");
-      toast.innerText = message;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 3000);
-    }
-
-    // REMOVED: sampleReports array
-
-    // --- UPDATED: Now fetches from Supabase ---
-    async function loadReports() {
-      const container = document.getElementById('reportsContainer');
-      container.innerHTML = '<p>Loading reports...</p>'; // Show loading state
-
-      const { data: reports, error } = await supabase
-          .from('lost_found_reports') // Assumes table is 'lost_found_reports'
-          .select('*')
-          .order('created_at', { ascending: false });
-
-      if (error) {
-          console.error('Error loading reports:', error);
-          container.innerHTML = '<p>Could not load reports. Please try again later.</p>';
-          return;
-      }
-      
-      if (reports.length === 0) {
-          container.innerHTML = '<p>No lost or found reports yet. Be the first to file one!</p>';
-          return;
-      }
-
-      container.innerHTML = ''; // Clear loading message
-      reports.forEach(report => {
-        const reportCard = document.createElement('div');
-        // Map database columns (e.g., report_type) to old hard-coded names (e.g., type)
-        reportCard.className = `report-card ${report.report_type}`; 
-        
-        reportCard.innerHTML = `
-          <div class="report-image">
-            ${report.pet_type === 'dog' ? '🐕' : report.pet_type === 'cat' ? '🐈' : '🐾'}
-          </div>
-          <div class="report-content">
-            <span class="report-status ${report.report_type === 'lost' ? 'status-lost' : 'status-found'}">
-              ${report.report_type === 'lost' ? 'LOST' : 'FOUND'}
-            </span>
-            <h3>${report.pet_name}</h3>
-            <p><strong>Type:</strong> ${report.pet_type.charAt(0).toUpperCase() + report.pet_type.slice(1)}</p>
-            <p><strong>Breed:</strong> ${report.breed || 'N/A'}</p>
-            <p><strong>Color:</strong> ${report.color}</p>
-            <p><strong>Location:</strong> ${report.location}</p>
-            <p><strong>Date:</strong> ${new Date(report.date).toLocaleDateString()}</p>
-            <p>${report.description}</p>
-            <div class="contact-info">
-              <strong>Contact:</strong> ${report.contact_phone}
-            </div>
-          </div>
-        `;
-
-        container.appendChild(reportCard);
-      });
-    }
-
-    // --- UPDATED: Now inserts into Supabase ---
-    document.getElementById('reportForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      // Secure auth check
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        showToast("Please login to submit a report");
-        return;
-      }
-
-      // Map form IDs to database column names
-      const reportData = {
-        report_type: document.getElementById('reportType').value,
-        pet_name: document.getElementById('petName').value,
-        pet_type: document.getElementById('petType').value,
-        breed: document.getElementById('petBreed').value,
-        color: document.getElementById('petColor').value,
-        location: document.getElementById('location').value,
-        date: document.getElementById('date').value,
-        contact_phone: document.getElementById('contactPhone').value,
-        description: document.getElementById('description').value,
-        user_id: user.id // Track which user submitted it
-      };
-
-      // Insert into Supabase
-      const { error } = await supabase
-          .from('lost_found_reports')
-          .insert(reportData);
-
-      if (error) {
-          console.error('Error submitting report:', error);
-          showToast("Report submission failed. Please try again.", 'error');
-      } else {
-          showToast("Report submitted successfully!");
-          this.reset();
-          // Refresh the list from the database
-          loadReports();
-      }
-    });
-
-    // Set today's date as default (Unchanged)
-    document.getElementById('date').valueAsDate = new Date();
-
-    // --- UPDATED: Removed old auth call ---
-    document.addEventListener('DOMContentLoaded', () => {
-      // updateAuthLinks(); // REMOVED
-      loadReports();
-    });
-  </script>
-  
-  </body>
+</body>
 </html>

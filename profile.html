@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - PetVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <script type="module" src="./supabase-client.js"></script>
+    <script src="./auth.js" defer></script>
+    <script src="./navigation.js" defer></script>
+    
+    <style>
+        .profile-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .profile-form {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            color: var(--primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--background);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.8rem;
+            border: 2px solid var(--primary-light);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 95, 191, 0.1);
+        }
+
+        /* Modern Custom Checkboxes */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-item {
+            position: relative;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            background: white;
+            user-select: none;
+        }
+
+        .checkbox-label:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 95, 191, 0.2);
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + .checkbox-label {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .checkbox-icon {
+            width: 20px;
+            height: 20px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + .checkbox-label .checkbox-icon {
+            background: white;
+            color: var(--primary);
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + .checkbox-label .checkbox-icon::after {
+            content: "✓";
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Radio Button Styles */
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .radio-item {
+            position: relative;
+        }
+
+        .radio-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1.5rem;
+            border: 2px solid var(--primary-light);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            background: white;
+        }
+
+        .radio-label:hover {
+            border-color: var(--primary);
+            background: var(--background);
+        }
+
+        .radio-item input[type="radio"]:checked + .radio-label {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Toggle Switch for Notifications */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--background);
+            border-radius: var(--radius);
+        }
+
+        .profile-picture-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-pic-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-light);
+            object-fit: cover;
+            background: var(--background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--primary);
+        }
+
+        .upload-btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .upload-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 95, 191, 0.3);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-stats {
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+  <div class="logo">
+    <a href="./index.html" style="text-decoration: none;">
+      <img src="https://mregdwyqmjurjnforhxa.supabase.co/storage/v1/object/public/pet-images/IMG-20251114-WA0022%20(1).jpg"
+           alt="PetVerse Logo"
+           style="height: 60px; width: 60px; border-radius: 50%; object-fit: cover; display:block;">
+    </a>
+  </div>
+  <ul>
+    <li><a href="./index.html" data-i18n="nav_home">Home</a></li>
+    <li><a href="./pets.html" data-i18n="nav_adopt">Adopt</a></li>
+    <li><a href="./volunteer.html" data-i18n="nav_volunteer">Volunteer</a></li>
+    <li><a href="./donate.html" data-i18n="nav_donate">Donate</a></li>
+    <li><a href="./community.html" data-i18n="nav_community">Community</a></li>
+    <li><a href="./lost-found.html" data-i18n="nav_lost_found">Lost & Found</a></li>
+    
+    <li><a href="./myadoptions.html" data-i18n="nav_my_adoptions">My Adoptions</a></li>
+
+    <li id="loginLinkItem">
+      <a href="./login.html" id="loginLink" data-i18n="nav_login">Login / Signup</a>
+    </li>
+
+    <li>
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="kn">ಕನ್ನಡ</option>
+      </select>
+    </li>
+  </ul>
+</nav>
+    <!-- PROFILE HEADER -->
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1>👤 My Profile</h1>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="adoptionCount">0</div>
+                    <div class="stat-label">Adoptions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="memberDays">0</div>
+                    <div class="stat-label">Days Member</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE FORM -->
+        <form class="profile-form" id="profileForm">
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h2 class="section-title">📝 Basic Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Username *</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" readonly style="background: var(--background);">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="dob">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label>Profile Picture</label>
+                    <div class="profile-picture-upload">
+                        <div class="profile-pic-preview" id="profilePicPreview">👤</div>
+                        <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+                        <label for="profilePicInput" class="upload-btn">📷 Upload Picture</label>
+                        <small style="color: var(--text-light);">Max 2MB - PNG, JPG, JPEG, GIF</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location & Contact -->
+            <div class="form-section">
+                <h2 class="section-title">📍 Location & Contact</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea id="address" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>State *</label>
+                        <select id="state" required>
+                            <option value="">Select State</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <!-- Add more states -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>City *</label>
+                        <input type="text" id="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label>PIN Code</label>
+                        <input type="text" id="pincode" pattern="[0-9]{6}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pet Preferences -->
+            <div class="form-section">
+                <h2 class="section-title">🐾 Pet Preferences</h2>
+                <div class="form-group">
+                    <label>Preferred Pet Types</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="petDog" name="petTypes" value="Dog">
+                            <label for="petDog" class="checkbox-label">
+                                <span class="checkbox-icon"></span>
+                                <span>🐕 Dog</span>
+                            </label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="petCat" name="petTypes" value="Cat">
+                            <label for="petCat" class="checkbox-label">
+                                <span class="checkbox-icon"></span>
+                                <span>🐈 Cat</span>
+                            </label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="petBird" name="petTypes" value="Bird">
+                            <label for="petBird" class="checkbox-label">
+                                <span class="checkbox-icon"></span>
+                                <span>🐦 Bird</span>
+                            </label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="petRabbit" name="petTypes" value="Rabbit">
+                            <label for="petRabbit" class="checkbox-label">
+                                <span class="checkbox-icon"></span>
+                                <span>🐰 Rabbit</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label>Home Type *</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="homeApartment" name="homeType" value="Apartment">
+                            <label for="homeApartment" class="radio-label">🏢 Apartment</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="homeHouse" name="homeType" value="House">
+                            <label for="homeHouse" class="radio-label">🏠 House with Yard</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Details -->
+            <div class="form-section">
+                <h2 class="section-title">👤 Additional Details</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select id="gender">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Contact Method</label>
+                        <select id="contactMethod">
+                            <option value="Email">📧 Email</option>
+                            <option value="Phone">📱 Phone</option>
+                            <option value="Both">📧📱 Both</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Language Preference</label>
+                        <select id="language">
+                            <option value="en">English</option>
+                            <option value="hi">हिन्दी (Hindi)</option>
+                            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Settings -->
+            <div class="form-section">
+                <h2 class="section-title">⚙️ Account Settings</h2>
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailNotifications">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <label for="emailNotifications" style="cursor: pointer; flex: 1;">
+                        Receive email notifications about new pets and updates
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="save-btn" id="saveBtn">💾 Save Profile Changes</button>
+        </form>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        // Wait for Supabase to load
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof supabase === 'undefined') {
+                alert('Error: Supabase not loaded');
+                return;
+            }
+
+            // Check if user is logged in
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            // Setup dropdown toggle
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const dropdown = document.querySelector('.dropdown-menu');
+            userMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!document.getElementById('userDropdown').contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    showToast('Logout failed', 'error');
+                } else {
+                    window.location.href = './index.html';
+                }
+            });
+
+            // Load profile data
+            await loadProfile(user);
+
+            // Setup form submission
+            document.getElementById('profileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveProfile(user);
+            });
+
+            // Profile picture upload
+            document.getElementById('profilePicInput').addEventListener('change', handleProfilePicture);
+        });
+
+        async function loadProfile(user) {
+            try {
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (error) throw error;
+
+                // Populate form fields
+                document.getElementById('username').value = profile.username || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('phone').value = profile.phone || '';
+                document.getElementById('dob').value = profile.date_of_birth || '';
+                document.getElementById('address').value = profile.address || '';
+                document.getElementById('state').value = profile.state || '';
+                document.getElementById('city').value = profile.city || '';
+                document.getElementById('pincode').value = profile.pincode || '';
+                document.getElementById('gender').value = profile.gender || '';
+                document.getElementById('contactMethod').value = profile.contact_method || 'Email';
+                document.getElementById('language').value = profile.language || 'en';
+                document.getElementById('emailNotifications').checked = profile.email_notifications || false;
+
+                // Load pet preferences
+                if (profile.pet_preferences && Array.isArray(profile.pet_preferences)) {
+                    profile.pet_preferences.forEach(pet => {
+                        const checkbox = document.querySelector(`input[name="petTypes"][value="${pet}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+
+                // Load home type
+                if (profile.home_type) {
+                    const radio = document.querySelector(`input[name="homeType"][value="${profile.home_type}"]`);
+                    if (radio) radio.checked = true;
+                }
+
+                // Update user display
+                document.getElementById('userName').textContent = profile.username || 'User';
+                document.getElementById('userAvatar').textContent = (profile.username || 'U')[0].toUpperCase();
+
+                // Load profile picture if exists
+                if (profile.profile_picture_url) {
+                    const preview = document.getElementById('profilePicPreview');
+                    preview.innerHTML = `<img src="${profile.profile_picture_url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                }
+
+                // Calculate member days
+                const memberSince = new Date(profile.created_at || user.created_at);
+                const today = new Date();
+                const days = Math.floor((today - memberSince) / (1000 * 60 * 60 * 24));
+                document.getElementById('memberDays').textContent = days;
+
+                // Get adoption count
+                const { data: adoptions } = await supabase
+                    .from('adoptions')
+                    .select('id')
+                    .eq('user_id', user.id);
+                document.getElementById('adoptionCount').textContent = adoptions ? adoptions.length : 0;
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showToast('Error loading profile', 'error');
+            }
+        }
+
+        async function saveProfile(user) {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            try {
+                // Get selected pet preferences
+                const petPreferences = Array.from(document.querySelectorAll('input[name="petTypes"]:checked'))
+                    .map(cb => cb.value);
+
+                // Get selected home type
+                const homeType = document.querySelector('input[name="homeType"]:checked')?.value;
+
+                const profileData = {
+                    username: document.getElementById('username').value,
+                    phone: document.getElementById('phone').value,
+                    date_of_birth: document.getElementById('dob').value || null,
+                    address: document.getElementById('address').value,
+                    state: document.getElementById('state').value,
+                    city: document.getElementById('city').value,
+                    pincode: document.getElementById('pincode').value,
+                    gender: document.getElementById('gender').value,
+                    contact_method: document.getElementById('contactMethod').value,
+                    language: document.getElementById('language').value,
+                    email_notifications: document.getElementById('emailNotifications').checked,
+                    pet_preferences: petPreferences,
+                    home_type: homeType,
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error } = await supabase
+                    .from('profiles')
+                    .update(profileData)
+                    .eq('id', user.id);
+
+                if (error) throw error;
+
+                showToast('Profile updated successfully!', 'success');
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                showToast('Error saving profile: ' + error.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Save Profile Changes';
+            }
+        }
+
+        async function handleProfilePicture(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check file size (2MB max)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('File size must be less than 2MB', 'error');
+                return;
+            }
+
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+
+                // Upload to Supabase Storage
+                const { error: uploadError } = await supabase.storage
+                    .from('profile-pictures')
+                    .upload(fileName, file);
+
+                if (uploadError) throw uploadError;
+
+                // Get public URL
+                const { data } = supabase.storage
+                    .from('profile-pictures')
+                    .getPublicUrl(fileName);
+
+                // Update profile with new picture URL
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ profile_picture_url: data.publicUrl })
+                    .eq('id', user.id);
+
+                if (updateError) throw updateError;
+
+                // Update preview
+                const preview = document.getElementById('profilePicPreview');
+                preview.innerHTML = `<img src="${data.publicUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+
+                showToast('Profile picture updated!', 'success');
+            } catch (error) {
+                console.error('Error uploading picture:', error);
+                showToast('Error uploading picture', 'error');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            let toast = document.getElementById("toast");
+            if (!toast) {
+                toast = document.createElement("div");
+                toast.id = "toast";
+                toast.className = "toast";
+                document.body.appendChild(toast);
+            }
+            toast.innerText = message;
+            toast.style.background = type === 'error' ? '#ff6b6b' : 
+                                    type === 'success' ? '#4CAF50' : '#8B5FBF';
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 3000);
+        }
+    </script>
+    <div data-i18n-skip>
+    <div id="chatbotFloatingIcon"
+         style="width:60px;height:60px;background:linear-gradient(135deg,#9b59b6,#c39bd3);
+                border-radius:50%;position:fixed;bottom:25px;right:25px;
+                display:none; /* Hidden by default, auth.js will show it if logged in */
+                justify-content:center;align-items:center;cursor:pointer;
+                box-shadow:0 5px 15px rgba(0,0,0,0.3);z-index:9999;">
+      <span style="font-size:28px;">🤖</span>
+    </div>
+
+    <div id="chatbotPanel"
+         style="width:350px;height:500px;background:white;border-radius:20px;
+                position:fixed;bottom:100px;right:25px;display:none;
+                flex-direction:column;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.25);
+                z-index:10000;">
+      <div style="padding:15px;background:#9b59b6;color:white;display:flex;align-items:center;gap:10px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/620/620851.png"
+             style="width:36px;height:36px;border-radius:50%;border:2px solid white;">
+        <strong>PetVerse AI Assistant 🐾</strong>
+      </div>
+      <div id="chatMessagesAI" style="flex:1;padding:10px;overflow-y:auto;background:#f8f0ff;"></div>
+      <div style="padding:10px;background:white;display:flex;gap:8px;">
+        <input id="chatInputAI" type="text" placeholder="Type your message…"
+               style="flex:1;padding:10px;border-radius:15px;border:1px solid #d5c4e6;">
+        <button id="sendChatBtnAI"
+                style="background:#9b59b6;color:white;border:none;padding:10px 14px;border-radius:14px;">➤</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
